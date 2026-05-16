@@ -23,7 +23,7 @@ object KubuszokPlugin extends AutoPlugin {
   private val ciReleaseCommand = Command.command("ci-release") { state =>
     val extracted = Project.extract(state)
     val tags = extracted.get(git.gitCurrentTags)
-    if (tags.nonEmpty) "publishSigned" :: "sonatypeBundleRelease" :: state
+    if (tags.nonEmpty) "publishSigned" :: "sonaRelease" :: state
     else "publishSigned" :: state
   }
 
