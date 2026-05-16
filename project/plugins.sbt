@@ -1,0 +1,10 @@
+addSbtPlugin("com.github.sbt" % "sbt2-compat" % "0.1.0")
+// All plugins that the source code imports from (needed to compile it in the meta-build)
+addSbtPlugin("com.github.sbt" % "sbt-git" % "2.1.0")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.6.1")
+addSbtPlugin("com.eed3si9n" % "sbt-projectmatrix" % "0.11.0")
+addSbtPlugin("com.indoorvivants" % "sbt-commandmatrix" % "0.1.0")
+addSbtPlugin("org.jetbrains.scala" % "sbt-ide-settings" % "1.1.4")
+addSbtPlugin("com.github.reibitto" % "sbt-welcome" % "0.5.0")
+// Needed for publishing this plugin itself
+addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.1")
