@@ -1,0 +1,11 @@
+target/
+.bsp/
+.idea/
+.metals/
+.bloop/
+.vscode/
+.claude/
+*.class
+*.log
+*.jar
+metals.sbt
