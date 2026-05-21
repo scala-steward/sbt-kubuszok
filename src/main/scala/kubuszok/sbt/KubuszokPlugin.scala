@@ -78,7 +78,7 @@ object KubuszokPlugin extends AutoPlugin {
         for3 = Seq("-Ygenerate-inkuire"),
         for2_13 = Seq.empty
       ),
-      Compile / console / scalacOptions --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings"),
+      Compile / console / scalacOptions --= Seq("-Ywarn-unused:imports", "-Werror", "-Xfatal-warnings"),
       publishTo := {
         if (isSnapshot.value) Some(mavenCentralSnapshots)
         else localStaging.value
