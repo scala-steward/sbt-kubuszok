@@ -7,7 +7,7 @@ An sbt plugin that bundles and auto-configures common build settings for Scala p
 Add to `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("com.kubuszok" % "sbt-kubuszok" % "0.1.0")
+addSbtPlugin("com.kubuszok" % "sbt-kubuszok" % "0.2.0")
 ```
 
 This single plugin brings in and configures:
@@ -85,17 +85,24 @@ ide.platform=jvm
 
 ### Aliases
 
-Derives CI/test/publish commands from `ProjectMatrix` instances:
+Derives CI/test/publish commands from `ProjectMatrix` instances grouped by role:
+
+- **`published`** — compiled, tested, and published (included in `publishLocal` and `publishLocalForTests`)
+- **`testOnly`** — compiled and tested, but not published
+- **`compileOnly`** — only verified for compilation
+
+Modules are deduplicated across groups, so accidental overlap won't produce duplicate tasks.
 
 ```scala
 lazy val al = new Aliases(
   published = Seq(core, utils, integration),
+  testOnly = Seq(tests),
   compileOnly = Seq(benchmarks)
 )
 
 // Auto-generated commands for each (platform, scala) combination:
 al.ci("JVM", "3")       // clean ; coverage ; core3/compile ; ... ; coverageOff
-al.test("JS", "2.13")   // coreJS/test ; utilsJS/test ; ...
+al.test("JS", "2.13")   // coreJS/test ; utilsJS/test ; testsJS/test ; ...
 al.release              // "ci-release" (the built-in command)
 al.publishLocal("JVM", "2.13")
 
