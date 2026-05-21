@@ -1,11 +1,12 @@
 package kubuszok.sbt
 
-import sbt._
+import sbt.*
 import sbt.internal.ProjectMatrix
 import sbtwelcome.UsefulTask
 
 class Aliases(
     val published: Seq[ProjectMatrix],
+    val testOnly: Seq[ProjectMatrix] = Seq.empty,
     val compileOnly: Seq[ProjectMatrix] = Seq.empty
 ) {
 
@@ -40,26 +41,30 @@ class Aliases(
     }.toVector
   }
 
-  protected lazy val combinations: Vector[(String, String)] = {
-    published.flatMap { matrix =>
-      matrix.allProjects().flatMap { case (_, axes) =>
-        val platform = axes.collectFirst { case pa: VirtualAxis.PlatformAxis => platformName(pa) }
-        val scalaBin = axes.collectFirst {
-          case sv: VirtualAxis.ScalaVersionAxis =>
-            CrossVersion.partialVersion(sv.scalaVersion) match {
-              case Some((2, 13)) => "2.13"
-              case Some((3, _))  => "3"
-              case _             => ""
+  protected lazy val combinations: Vector[(String, String)] =
+    (published ++ testOnly ++ compileOnly)
+      .flatMap { matrix =>
+        matrix.allProjects().flatMap { case (_, axes) =>
+          val platform = axes.collectFirst { case pa: VirtualAxis.PlatformAxis => platformName(pa) }
+          val scalaBin = axes
+            .collectFirst { case sv: VirtualAxis.ScalaVersionAxis =>
+              CrossVersion.partialVersion(sv.scalaVersion) match {
+                case Some((2, 13)) => "2.13"
+                case Some((3, _))  => "3"
+                case _             => ""
+              }
             }
-        }.filter(_.nonEmpty)
-        for { p <- platform; s <- scalaBin } yield (p, s)
+            .filter(_.nonEmpty)
+          for { p <- platform; s <- scalaBin } yield (p, s)
+        }
       }
-    }.distinct.toVector.sortBy { case (p, s) =>
-      val platformOrder = p match { case "JVM" => 0; case "JS" => 1; case _ => 2 }
-      val scalaOrder = s match { case "3" => 0; case _ => 1 }
-      (platformOrder, scalaOrder)
-    }
-  }
+      .distinct
+      .toVector
+      .sortBy { case (p, s) =>
+        val platformOrder = p match { case "JVM" => 0; case "JS" => 1; case _ => 2 }
+        val scalaOrder = s match { case "3" => 0; case _ => 1 }
+        (platformOrder, scalaOrder)
+      }
 
   protected def platformName(axis: VirtualAxis.PlatformAxis): String =
     if (axis == VirtualAxis.jvm) "JVM"
@@ -80,23 +85,21 @@ class Aliases(
   }
 
   def ci(platform: String, scalaBinary: String): String = {
-    val publishedIds = projectIds(published, platform, scalaBinary)
-    val compileOnlyIds = projectIds(compileOnly, platform, scalaBinary)
-
-    def tasksOf(task: String): Vector[String] = publishedIds.map(id => s"$id/$task")
+    val testedIds = projectIds(published ++ testOnly, platform, scalaBinary).distinct
+    val compiledOnlyIds = projectIds(compileOnly, platform, scalaBinary).filterNot(testedIds.contains)
 
     val clean = Vector("clean")
-    val compileAndTest = tasksOf("compile") ++ tasksOf("test")
+    val compileAndTest = testedIds.map(id => s"$id/compile") ++ testedIds.map(id => s"$id/test")
     val coverageCompileAndTest =
       if (platform == "JVM") "coverage" +: compileAndTest :+ "coverageAggregate" :+ "coverageOff"
       else compileAndTest
 
-    val tasks = clean ++ coverageCompileAndTest ++ compileOnlyIds.map(id => s"$id/compile")
+    val tasks = clean ++ coverageCompileAndTest ++ compiledOnlyIds.map(id => s"$id/compile")
     tasks.mkString(" ; ")
   }
 
   def test(platform: String, scalaBinary: String): String =
-    projectIds(published, platform, scalaBinary).map(id => s"$id/test").mkString(" ; ")
+    projectIds(published ++ testOnly, platform, scalaBinary).distinct.map(id => s"$id/test").mkString(" ; ")
 
   val release: String = "ci-release"
 
@@ -105,21 +108,23 @@ class Aliases(
 
   def publishLocalForTests(filter: (String, String) => Boolean): String = {
     val allCombinations = published.flatMap { matrix =>
-      matrix.allProjects().collect { case (project, axes) =>
-        val platform = axes.collectFirst { case pa: VirtualAxis.PlatformAxis => pa }
-        val scalaBin = axes.collectFirst {
-          case sv: VirtualAxis.ScalaVersionAxis =>
+      matrix
+        .allProjects()
+        .collect { case (project, axes) =>
+          val platform = axes.collectFirst { case pa: VirtualAxis.PlatformAxis => pa }
+          val scalaBin = axes.collectFirst { case sv: VirtualAxis.ScalaVersionAxis =>
             CrossVersion.partialVersion(sv.scalaVersion) match {
               case Some((2, 13)) => "2.13"
               case Some((3, _))  => "3"
               case _             => ""
             }
+          }
+          (project.id, platform, scalaBin)
         }
-        (project.id, platform, scalaBin)
-      }.collect {
-        case (id, Some(platform), Some(scalaBin)) if filter(scalaBin, platformName(platform)) =>
-          s"$id/publishLocal"
-      }
+        .collect {
+          case (id, Some(platform), Some(scalaBin)) if filter(scalaBin, platformName(platform)) =>
+            s"$id/publishLocal"
+        }
     }
     allCombinations.mkString(" ; ")
   }
