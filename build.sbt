@@ -2,8 +2,8 @@ import sbtwelcome.UsefulTask
 
 val versions = new {
 
-  val sbt1 = "1.12.6"
-  val sbt2 = "2.0.0-RC9"
+  val sbt1 = "1.12.11"
+  val sbt2 = "2.0.0-RC14"
 }
 
 // The plugin sources are compiled by the meta-build (project/build.sbt) and apply themselves here.
@@ -15,10 +15,10 @@ lazy val sbtKubuszok = (project in file("."))
     homepage := Some(url("https://github.com/kubuszok/sbt-kubuszok")),
     licenses := List("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0")),
     developers := List(
-      Developer("MateuszKubuszok", "Mateusz Kubuszok", "mateusz@kubuszok.com", url("https://kubuszok.com"))
+      Developer("MateuszKubuszok", "Mateusz Kubuszok", "", url("https://kubuszok.com"))
     ),
     // sbt 2 cross-compilation ready but disabled until all dependencies publish for it
-    crossScalaVersions := Seq( /* "3.8.1", */ "2.12.21"),
+    crossScalaVersions := Seq( /* "3.8.4", */ "2.12.21"),
     scalaVersion := "2.12.21",
     (pluginCrossBuild / sbtVersion) := {
       scalaBinaryVersion.value match {
@@ -50,7 +50,7 @@ lazy val sbtKubuszok = (project in file("."))
     addSbtPlugin("com.eed3si9n" % "sbt-projectmatrix" % "0.11.0"),
     addSbtPlugin("com.indoorvivants" % "sbt-commandmatrix" % "0.1.0"),
     addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.21.0"),
-    addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.5.11"),
+    addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.5.12"),
     // publishing
     addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.1"),
     // MiMa
