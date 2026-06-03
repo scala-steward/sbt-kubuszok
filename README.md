@@ -7,7 +7,7 @@ An sbt plugin that bundles and auto-configures common build settings for Scala p
 Add to `project/plugins.sbt`:
 
 ```scala
-addSbtPlugin("com.kubuszok" % "sbt-kubuszok" % "0.2.0")
+addSbtPlugin("com.kubuszok" % "sbt-kubuszok" % "0.2.1")
 ```
 
 This single plugin brings in and configures:
@@ -30,7 +30,7 @@ This single plugin brings in and configures:
 
 Activates automatically when its dependencies are present. Provides:
 
-- **Git versioning**: Enables `GitVersioning` and `GitBranchPrompt` for all projects. Version is derived from git tags (`v1.0.0` tag -> `1.0.0`, no tag -> `<hash>-SNAPSHOT`).
+- **Git versioning**: Enables `GitVersioning` and `GitBranchPrompt` for all projects. Version is derived from git tags (`1.0.0` tag -> `1.0.0`, no tag -> `<hash>-SNAPSHOT`).
 - **Publishing**: Configures `publishTo` (snapshots to Maven Central Snapshots, releases to local staging), `publishMavenStyle`, `versionScheme := "early-semver"`.
 - **`ci-release` command**: Dynamically checks git tags at runtime — if a tag is present, runs `publishSigned` then `sonatypeBundleRelease`; otherwise just `publishSigned` (snapshot).
 - **`projectType` setting**: Controls publishing behavior per project:
