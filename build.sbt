@@ -54,7 +54,7 @@ lazy val sbtKubuszok = (project in file("."))
     // publishing
     addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.3.1"),
     // MiMa
-    addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.4"),
+    addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.1.5"),
     // disabling projects in IDE
     addSbtPlugin("org.jetbrains.scala" % "sbt-ide-settings" % "1.1.4"),
     // documentation
