@@ -25,7 +25,9 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
       - uses: coursier/setup-action@v3.0.0
         with:
-          jvm: 'temurin:1.11.0.28'
+          # sbt 2.0 requires JDK 17+ (the cross-build publishes the _sbt2_3 axis), so we can
+          # no longer release on JDK 11.
+          jvm: 'temurin:17'
           apps: sbt
       - name: Publish all projects
         run:  sbt ci-release
