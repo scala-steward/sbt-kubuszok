@@ -71,9 +71,9 @@ class Aliases(
       }
 
   protected def platformName(axis: VirtualAxis.PlatformAxis): String =
-    if (axis == VirtualAxis.jvm) "JVM"
-    else if (axis == VirtualAxis.js) "JS"
-    else if (axis == VirtualAxis.native) "Native"
+    if axis == VirtualAxis.jvm then "JVM"
+    else if axis == VirtualAxis.js then "JS"
+    else if axis == VirtualAxis.native then "Native"
     else axis.value
 
   protected def platformDisplayName(platform: String): String = platform match {
@@ -95,7 +95,7 @@ class Aliases(
     val clean = Vector("clean")
     val compileAndTest = testedIds.map(id => s"$id/compile") ++ testedIds.map(id => s"$id/test")
     val coverageCompileAndTest =
-      if (platform == "JVM") "coverage" +: compileAndTest :+ "coverageAggregate" :+ "coverageOff"
+      if platform == "JVM" then "coverage" +: compileAndTest :+ "coverageAggregate" :+ "coverageOff"
       else compileAndTest
 
     val tasks = clean ++ coverageCompileAndTest ++ compiledOnlyIds.map(id => s"$id/compile")

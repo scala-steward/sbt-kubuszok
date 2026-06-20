@@ -25,8 +25,10 @@ object KubuszokPlugin extends AutoPlugin {
   private val ciReleaseCommand = Command.command("ci-release") { state =>
     val extracted = Project.extract(state)
     val tags = extracted.get(git.gitCurrentTags)
-    if (tags.nonEmpty) "publishSigned" :: "sonaRelease" :: state
-    else "publishSigned" :: state
+    // "+" cross-publishes EVERY crossScalaVersions axis (sbt 1.x `_2.12_1.0` AND sbt 2.0 `_sbt2_3`);
+    // a plain "publishSigned" would only publish the default axis and silently omit the sbt 2.0 artifact.
+    if (tags.nonEmpty) "+publishSigned" :: "sonaRelease" :: state
+    else "+publishSigned" :: state
   }
 
   object autoImport {
