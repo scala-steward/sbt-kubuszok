@@ -1,6 +1,6 @@
 package kubuszok.sbt
 
-import sbt._
+import sbt.*
 import sbtwelcome.WelcomePlugin
 
 object KubuszokRootPlugin extends AutoPlugin {

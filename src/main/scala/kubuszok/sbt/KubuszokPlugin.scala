@@ -10,12 +10,14 @@ import commandmatrix.CommandMatrixPlugin
 import org.scalafmt.sbt.ScalafmtPlugin
 import org.scalafmt.sbt.ScalafmtPlugin.autoImport.scalafmtOnCompile
 import sbtide.Keys.ideSkipProject
+import com.jsuereth.sbtpgp.SbtPgp
+import com.jsuereth.sbtpgp.PgpKeys.publishSigned
 
 object KubuszokPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
   override def requires =
-    GitPlugin && ScalafmtPlugin && CommandMatrixPlugin
+    GitPlugin && ScalafmtPlugin && CommandMatrixPlugin && SbtPgp
 
   // Provides "ci-release" command that:
   // - snapshot (no git tag): runs publishSigned (goes directly to snapshot repo)
@@ -50,6 +52,11 @@ object KubuszokPlugin extends AutoPlugin {
 
     lazy val projectType: SettingKey[ProjectType] =
       settingKey[ProjectType]("What kind of project is this? Used to automatically configure publishing.")
+
+    lazy val checkNoSnapshotDeps: TaskKey[Unit] =
+      taskKey[Unit](
+        "Fail the build if a non-snapshot (releasable) version depends on any -SNAPSHOT module (transitive included). No-op for SNAPSHOT versions."
+      )
   }
 
   import autoImport.*
@@ -84,8 +91,8 @@ object KubuszokPlugin extends AutoPlugin {
         else localStaging.value
       },
       publishMavenStyle := true,
-      publish / skip := (projectType.value == ProjectType.NonPublished),
-      publishArtifact := (projectType.value != ProjectType.NonPublished),
+      publish / skip := Compat.uncached(projectType.value == ProjectType.NonPublished),
+      publishArtifact := Compat.uncached(projectType.value != ProjectType.NonPublished),
       Test / publishArtifact := false,
       pomIncludeRepository := { _ => false },
       versionScheme := Some("early-semver"),
@@ -96,6 +103,29 @@ object KubuszokPlugin extends AutoPlugin {
       // (now this suffix is empty by default) so we need to fix it manually.
       git.gitUncommittedChanges := git.gitCurrentTags.value.isEmpty,
       git.uncommittedSignifier := Some("SNAPSHOT"),
-      projectType := ProjectType.NonPublished
+      projectType := ProjectType.NonPublished,
+      checkNoSnapshotDeps := Compat.uncached {
+        val log = streams.value.log
+        // A SNAPSHOT version is allowed to depend on SNAPSHOTs.
+        if (isSnapshot.value) {
+          log.debug("checkNoSnapshotDeps: skipped (this is a SNAPSHOT version)")
+        } else {
+          val offending = update.value.allModules
+            .filter(_.revision.endsWith("-SNAPSHOT"))
+            .map(m => s"${m.organization}:${m.name}:${m.revision}")
+            .distinct
+            .sorted
+          if (offending.nonEmpty) {
+            sys.error(
+              s"""Refusing to publish releasable version ${version.value}: it depends on SNAPSHOT modules:
+                 |  ${offending.mkString("\n  ")}
+                 |Release those dependencies first, or publish this as a SNAPSHOT.""".stripMargin
+            )
+          }
+        }
+      },
+      // Run the SNAPSHOT guard before publishing (it short-circuits for SNAPSHOT versions).
+      publish := publish.dependsOn(checkNoSnapshotDeps).value,
+      publishSigned := publishSigned.dependsOn(checkNoSnapshotDeps).value
     )
 }
