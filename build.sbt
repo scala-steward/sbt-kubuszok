@@ -69,7 +69,7 @@ lazy val sbtKubuszok = (project in file("."))
           // cross-compile
           Defaults.sbtPluginExtra("com.eed3si9n" % "sbt-projectmatrix" % "0.11.0", sbtV, scalaV),
           // documentation
-          Defaults.sbtPluginExtra("com.github.reibitto" % "sbt-welcome" % "0.5.0", sbtV, scalaV)
+          Defaults.sbtPluginExtra("com.github.reibitto" % "sbt-welcome" % "0.6.0", sbtV, scalaV)
         )
       } else Seq.empty
     }
