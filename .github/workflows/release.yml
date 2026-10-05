@@ -23,7 +23,7 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
-      - uses: coursier/setup-action@v3.0.3
+      - uses: coursier/setup-action@v3.0.4
         with:
           # sbt 2.0 requires JDK 17+ (the cross-build publishes the _sbt2_3 axis), so we can
           # no longer release on JDK 11.
