@@ -1,6 +1,6 @@
 addSbtPlugin("com.github.sbt" % "sbt2-compat" % "0.2.0")
 // All plugins that the source code imports from (needed to compile it in the meta-build)
-addSbtPlugin("com.github.sbt" % "sbt-git" % "2.2.0")
+addSbtPlugin("com.github.sbt" % "sbt-git" % "3.0.0")
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.6.2")
 addSbtPlugin("com.eed3si9n" % "sbt-projectmatrix" % "0.11.0")
 addSbtPlugin("com.indoorvivants" % "sbt-commandmatrix" % "0.1.0")
